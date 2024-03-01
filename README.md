@@ -9,7 +9,7 @@ Finally, run `node --env-file=.env index.js` to run the server.
 
 You can interact with the server using Postman or any other favorite API client (e.g., `cURL`).
 
-To test the API, execute a `POST` request to `http://localhost:8000/interact`.
+To test the API, execute a `POST` request to `http://localhost:8080/interact`.
 
 The request should have a body in the following format:
 ```json

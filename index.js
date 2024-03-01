@@ -4,7 +4,7 @@ const OpenAI = require("openai");
 const axios = require('axios');
 
 const app = express();
-const port = 8000;
+const port = 8080;
 
 app.use(bodyParser.json());
 
@@ -69,7 +69,9 @@ async function secureOutput(openaiResponse) {
 }
 
 async function agent(prompt) {
+  // Secure your prompt with Pillar API
   const securePrompt = await secureInput(prompt);
+  
   try {
     const messages = [
       {
@@ -88,6 +90,7 @@ async function agent(prompt) {
         messages: messages,
       });
 
+      // Secure your model's response with Pillar API
       const secureResponse = await secureOutput(response);
 
       const { finish_reason, message } = secureResponse.choices[0];
