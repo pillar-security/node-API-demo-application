@@ -1,6 +1,7 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const OpenAI = require("openai");
+const axios = require('axios');
 
 const app = express();
 const port = 8000;
@@ -12,7 +13,33 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true,
 });
 
+async function secureInput(prompt) {
+  try {
+    const response = await axios.post('https://pillarseclabs.com/api/v1/scan/prompt', {
+      message: prompt,
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.PILLAR_API_KEY}`
+      }
+    });
+
+    let detectedIssues = [];
+    Object.entries(response.data).forEach(([key, value]) => {
+      if (value) detectedIssues.push(key)
+    });
+    if (detectedIssues.length > 0) {
+      throw new Error(`Threat detected in user input: ${detectedIssues.join(', ')}`);
+    }
+
+    return prompt;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
 async function agent(prompt) {
+  const securePrompt = await secureInput(prompt);
   try {
     const messages = [
       {
@@ -21,7 +48,7 @@ async function agent(prompt) {
       },
       {
         role: "user",
-        content: prompt,
+        content: securePrompt,
       }
     ];
 
