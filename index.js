@@ -38,6 +38,36 @@ async function secureInput(prompt) {
   }
 }
 
+async function secureOutput(openaiResponse) {
+  try {
+    const response = await axios.post('https://pillarseclabs.com/api/v1/scan/response', {
+      message: openaiResponse.choices[0].message.content,
+      scanners: {
+        pii: true,
+        secrets: true,
+        toxic_language: true,
+      }
+    }, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.PILLAR_API_KEY}`
+      }
+    });
+
+    let detectedIssues = [];
+    Object.entries(response.data).forEach(([key, value]) => {
+      if (value) detectedIssues.push(key)
+    });
+    if (detectedIssues.length > 0) {
+      throw new Error(`Threat detected in LLM response: ${detectedIssues.join(', ')}`);
+    }
+
+    return openaiResponse;
+  } catch (error) {
+    throw new Error(error.message);
+  }
+}
+
 async function agent(prompt) {
   const securePrompt = await secureInput(prompt);
   try {
@@ -58,7 +88,9 @@ async function agent(prompt) {
         messages: messages,
       });
 
-      const { finish_reason, message } = response.choices[0];
+      const secureResponse = await secureOutput(response);
+
+      const { finish_reason, message } = secureResponse.choices[0];
 
       if (finish_reason === "stop") {
         messages.push(message);
