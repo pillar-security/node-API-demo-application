@@ -2,13 +2,14 @@
 
 This is a simple node-express API application to interact with OpenAI.
 
-To get started, first clone the repository.
-Then, `npm install`.
-Make sure to copy the `.env.template` to a `.env` file and add your credentials.
-Finally, run `node --env-file=.env index.js` to run the server.
+### Getting Started
+1. Clone the repository.
+2. `npm install`
+3. Copy the `.env.template` to a `.env` file; add your credentials.
+4. Run `node --env-file=.env index.js` to start the server.
+
 
 You can interact with the server using Postman or any other favorite API client (e.g., `cURL`).
-
 To test the API, execute a `POST` request to `http://localhost:8080/interact`.
 
 The request should have a body in the following format:
@@ -16,4 +17,12 @@ The request should have a body in the following format:
 {
   "prompt": "Here is some user input that will be sent to OpenAI."
 }
+```
+
+Using `cURL`, this could look like this:
+```bash
+curl -X POST \
+-H "Content-Type: application/json" \
+-d '{"prompt": "Here is some user input that will be sent to OpenAI."}' \
+http://localhost:8080/interact
 ```
